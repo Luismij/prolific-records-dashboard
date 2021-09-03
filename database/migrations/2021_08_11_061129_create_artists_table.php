@@ -18,7 +18,10 @@ class CreateArtistsTable extends Migration
             $table->string('name');
             $table->string('photo');
             $table->text('description');
-            $table->string('social_media')->nullable();
+            $table->string('facebook')->nullable();
+            $table->string('instagram')->nullable();
+            $table->string('twitter')->nullable();
+            $table->string('youtube')->nullable();
             $table->date('birth_date')->nullable();
             $table->string('birth_place')->nullable();
             $table->timestamps();

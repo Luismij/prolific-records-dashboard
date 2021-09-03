@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import { isUserLoggedIn, getUserData, getHomeRouteForLoggedInUser } from '@/auth/utils'
+import { isUserLoggedIn } from '@/auth/utils'
 
 Vue.use(VueRouter)
 
@@ -14,7 +14,7 @@ const router = new VueRouter({
     {
       path: '/',
       name: 'artistas',
-      component: () => import('@/views/artistas/lista-artistas/ListaArtistas.vue'),
+      component: () => import('@/views/artistas/ListaArtistas.vue'),
       meta: {
         pageTitle: 'Artistas',
         breadcrumb: [
@@ -26,14 +26,48 @@ const router = new VueRouter({
       },
     },
     {
+      path: '/artista/:id',
+      name: 'artista',
+      component: () => import('@/views/artistas/Artista.vue'),
+      meta: {
+        pageTitle: 'Artistas',
+        breadcrumb: [
+          {
+            text: 'Artistas',
+          },
+          {
+            text: 'Ver artista',
+            active: true,
+          },
+        ],
+      },
+    },
+    {
       path: '/contratos',
       name: 'contratos',
-      component: () => import('@/views/Contratos.vue'),
+      component: () => import('@/views/contratos/ListaContratos.vue'),
       meta: {
         pageTitle: 'Contratos',
         breadcrumb: [
           {
             text: 'Contratos',
+            active: true,
+          },
+        ],
+      },
+    },
+    {
+      path: '/contrato/:id',
+      name: 'contrato',
+      component: () => import('@/views/contratos/Contrato.vue'),
+      meta: {
+        pageTitle: 'Contrato',
+        breadcrumb: [
+          {
+            text: 'Contratos',
+          },
+          {
+            text: 'Ver contrato',
             active: true,
           },
         ],
@@ -60,6 +94,16 @@ const router = new VueRouter({
       redirect: 'error-404',
     },
   ],
+})
+
+router.beforeEach((to, _, next) => {
+  const isLoggedIn = isUserLoggedIn()
+
+  if (to.name !== 'login' && !isLoggedIn) {
+    return next({ name: 'login' })
+  }
+
+  return next()
 })
 
 

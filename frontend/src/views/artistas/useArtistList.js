@@ -1,6 +1,5 @@
 import { ref, watch, computed } from '@vue/composition-api'
 import store from '@/store'
-import { title } from '@core/utils/filter'
 
 // Notification
 import { useToast } from 'vue-toastification/composition'
@@ -10,16 +9,15 @@ export default function useArtistList() {
   // Use toast
   const toast = useToast()
 
-  const refUserListTable = ref(null)
+  const refArtistListTable = ref(null)
 
   // Table Handlers
   const tableColumns = [
     { key: 'name', label: 'Nombre', sortable: true },
-    { key: 'photo', label: 'Foto', sortable: true },
-    { key: 'description', label: 'Descripcion', sortable: true },
+    { key: 'description', label: 'Descripcion' },
     { key: 'social_media', label: 'Redes sociales' },
-    { key: 'birth_date', label: 'Fecha de nacimiento' },
-    { key: 'birth_place', label: 'Lugar de nacimiento' },
+    { key: 'birth_date', label: 'Fecha de nacimiento', sortable: true },
+    { key: 'birth_place', label: 'Lugar de nacimiento', sortable: true },
     { key: 'actions', label: 'Operaciones' },
   ]
   const perPage = ref(10)
@@ -29,12 +27,9 @@ export default function useArtistList() {
   const searchQuery = ref('')
   const sortBy = ref('id')
   const isSortDirDesc = ref(true)
-  const roleFilter = ref(null)
-  const planFilter = ref(null)
-  const statusFilter = ref(null)
 
   const dataMeta = computed(() => {
-    const localItemsCount = refUserListTable.value ? refUserListTable.value.localItems.length : 0
+    const localItemsCount = refArtistListTable.value ? refArtistListTable.value.localItems.length : 0
     return {
       from: perPage.value * (currentPage.value - 1) + (localItemsCount ? 1 : 0),
       to: perPage.value * (currentPage.value - 1) + localItemsCount,
@@ -43,24 +38,21 @@ export default function useArtistList() {
   })
 
   const refetchData = () => {
-    refUserListTable.value.refresh()
+    refArtistListTable.value.refresh()
   }
 
-  watch([currentPage, perPage, searchQuery, roleFilter, planFilter, statusFilter], () => {
+  watch([currentPage, perPage, searchQuery], () => {
     refetchData()
   })
 
   const fetchArtist = (ctx, callback) => {
     store
-      .dispatch('artist/fetchArtist', {
+      .dispatch('artist/fetchAllArtist', {
         q: searchQuery.value,
         perPage: perPage.value,
         page: currentPage.value,
         sortBy: sortBy.value,
         sortDesc: isSortDirDesc.value,
-        role: roleFilter.value,
-        plan: planFilter.value,
-        status: statusFilter.value,
       })
       .then(response => {
         const { artist } = response.data.result
@@ -85,30 +77,6 @@ export default function useArtistList() {
   // *--------- UI ---------------------------------------*
   // *===============================================---*
 
-  const resolveUserRoleVariant = role => {
-    if (role === 'subscriber') return 'primary'
-    if (role === 'author') return 'warning'
-    if (role === 'maintainer') return 'success'
-    if (role === 'editor') return 'info'
-    if (role === 'admin') return 'danger'
-    return 'primary'
-  }
-
-  const resolveUserRoleIcon = role => {
-    if (role === 'subscriber') return 'UserIcon'
-    if (role === 'author') return 'SettingsIcon'
-    if (role === 'maintainer') return 'DatabaseIcon'
-    if (role === 'editor') return 'Edit2Icon'
-    if (role === 'admin') return 'ServerIcon'
-    return 'UserIcon'
-  }
-
-  const resolveUserStatusVariant = status => {
-    if (status === 'pending') return 'warning'
-    if (status === 'active') return 'success'
-    if (status === 'inactive') return 'secondary'
-    return 'primary'
-  }
 
   return {
     fetchArtist,
@@ -121,16 +89,8 @@ export default function useArtistList() {
     searchQuery,
     sortBy,
     isSortDirDesc,
-    refUserListTable,
+    refArtistListTable,
 
-    resolveUserRoleVariant,
-    resolveUserRoleIcon,
-    resolveUserStatusVariant,
     refetchData,
-
-    // Extra Filters
-    roleFilter,
-    planFilter,
-    statusFilter,
   }
 }

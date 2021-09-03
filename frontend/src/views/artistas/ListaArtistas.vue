@@ -1,23 +1,15 @@
 <template>
-
   <div>
-
     <nuevo-artista
       :is-add-new-artist-sidebar-active.sync="isAddNewArtistSidebarActive"
       @refetch-data="refetchData"
     />
 
     <!-- Table Container Card -->
-    <b-card
-      no-body
-      class="mb-0"
-    >
-
+    <b-card no-body class="mb-0">
       <div class="m-2">
-
         <!-- Table Top -->
         <b-row>
-
           <!-- Per Page -->
           <b-col
             cols="12"
@@ -36,10 +28,7 @@
           </b-col>
 
           <!-- Search -->
-          <b-col
-            cols="12"
-            md="6"
-          >
+          <b-col cols="12" md="6">
             <div class="d-flex align-items-center justify-content-end">
               <b-form-input
                 v-model="searchQuery"
@@ -55,11 +44,10 @@
             </div>
           </b-col>
         </b-row>
-
       </div>
 
       <b-table
-        ref="refUserListTable"
+        ref="refArtistListTable"
         class="position-relative"
         :items="fetchArtist"
         responsive
@@ -70,8 +58,7 @@
         empty-text="No hay artistas registrados"
         :sort-desc.sync="isSortDirDesc"
       >
-
-        <!-- Column: User -->
+        <!-- Column: Artist -->
         <template #cell(name)="data">
           <b-media vertical-align="center">
             <template #aside>
@@ -82,59 +69,101 @@
                 variant="light-success"
               />
             </template>
-            <div class="font-weight-bold d-block text-nowrap">
+            <div class="font-weight-bold d-block">
               {{ data.item.name }}
             </div>
-            <small class="text-muted">@{{ data.item.name }}</small>
           </b-media>
+        </template>
+
+        <!-- Column: Social Media -->
+        <template #cell(social_media)="data">
+          <div class="d-flex">
+            <b-link
+              :href="data.item.facebook"
+              target="_blank"
+              v-if="data.item.facebook"
+            >
+              <b-button variant="outline-primary" class="btn-icon mr-25">
+                <feather-icon icon="FacebookIcon" />
+              </b-button>
+            </b-link>
+            <b-link
+              :href="data.item.instagram"
+              target="_blank"
+              v-if="data.item.instagram"
+            >
+              <b-button variant="outline-warning" class="btn-icon mr-25">
+                <feather-icon icon="InstagramIcon" />
+              </b-button>
+            </b-link>
+            <b-link
+              :href="data.item.twitter"
+              target="_blank"
+              v-if="data.item.twitter"
+            >
+              <b-button variant="outline-info" class="btn-icon mr-25">
+                <feather-icon icon="TwitterIcon" />
+              </b-button>
+            </b-link>
+            <b-link
+              :href="data.item.youtube"
+              target="_blank"
+              v-if="data.item.youtube"
+            >
+              <b-button variant="outline-danger" class="btn-icon">
+                <feather-icon icon="YoutubeIcon" />
+              </b-button>
+            </b-link>
+          </div>
         </template>
 
         <!-- Column: Actions -->
         <template #cell(actions)="data">
-          <b-dropdown
-            variant="link"
-            no-caret
-            :right="$store.state.appConfig.isRTL"
-          >
-
-            <template #button-content>
-              <feather-icon
-                icon="MoreVerticalIcon"
-                size="16"
-                class="align-middle text-body"
-              />
-            </template>
-
-            <b-dropdown-item :to="{ name: 'apps-users-edit', params: { id: data.item.id } }">
-              <feather-icon icon="EditIcon" />
-              <span class="align-middle ml-50">Edit</span>
-            </b-dropdown-item>
-
-            <b-dropdown-item>
-              <feather-icon icon="TrashIcon" />
-              <span class="align-middle ml-50">Delete</span>
-            </b-dropdown-item>
-          </b-dropdown>
+          <div class="d-flex">
+            <b-button
+              variant="outline-primary"
+              size="sm"
+              :to="{ name: 'artista', params: { id: data.item.id } }"
+              class="mr-25 text-nowrap"
+            >
+              Ver mas
+            </b-button>
+            <b-button
+              variant="outline-danger"
+              size="sm"
+              @click="deleteArtist(data.item.id)"
+            >
+              Borrar
+            </b-button>
+          </div>
         </template>
-
       </b-table>
       <div class="mx-2 mb-2">
         <b-row>
-
           <b-col
             cols="12"
             sm="6"
-            class="d-flex align-items-center justify-content-center justify-content-sm-start"
+            class="
+              d-flex
+              align-items-center
+              justify-content-center justify-content-sm-start
+            "
           >
-            <span class="text-muted">Mostrando desde {{ dataMeta.from }} hasta {{ dataMeta.to }} de {{ dataMeta.of }} registros</span>
+            <span class="text-muted"
+              >Mostrando desde {{ dataMeta.from }} hasta {{ dataMeta.to }} de
+              {{ dataMeta.of }} registros</span
+            >
           </b-col>
           <!-- Pagination -->
           <b-col
             cols="12"
             sm="6"
-            class="d-flex align-items-center justify-content-center justify-content-sm-end"
+            class="
+              d-flex
+              align-items-center
+              justify-content-center justify-content-sm-end
+            "
           >
-
             <b-pagination
               v-model="currentPage"
               :total-rows="totalArtist"
@@ -146,21 +175,13 @@
               next-class="next-item"
             >
               <template #prev-text>
-                <feather-icon
-                  icon="ChevronLeftIcon"
-                  size="18"
-                />
+                <feather-icon icon="ChevronLeftIcon" size="18" />
               </template>
               <template #next-text>
-                <feather-icon
-                  icon="ChevronRightIcon"
-                  size="18"
-                />
+                <feather-icon icon="ChevronRightIcon" size="18" />
               </template>
             </b-pagination>
-
           </b-col>
-
         </b-row>
       </div>
     </b-card>
@@ -169,16 +190,25 @@
 
 <script>
 import {
-  BCard, BRow, BCol, BFormInput, BButton, BTable, BMedia, BAvatar, BLink,
-  BBadge, BDropdown, BDropdownItem, BPagination,
-} from 'bootstrap-vue'
-import vSelect from 'vue-select'
-import store from '@/store'
-import { ref, onUnmounted } from '@vue/composition-api'
-import { avatarText } from '@core/utils/filter'
-import useArtistList from './useArtistList'
-import artistStoreModule from '../artistStoreModule'
-import NuevoArtista from './NuevoArtista.vue'
+  BCard,
+  BRow,
+  BCol,
+  BFormInput,
+  BButton,
+  BTable,
+  BMedia,
+  BAvatar,
+  BLink,
+  BBadge,
+  BPagination,
+} from "bootstrap-vue";
+import vSelect from "vue-select";
+import store from "@/store";
+import { ref, onUnmounted } from "@vue/composition-api";
+import { avatarText } from "@core/utils/filter";
+import useArtistList from "./useArtistList";
+import artistStoreModule from "./artistStoreModule";
+import NuevoArtista from "./NuevoArtista.vue";
 
 export default {
   components: {
@@ -194,24 +224,30 @@ export default {
     BAvatar,
     BLink,
     BBadge,
-    BDropdown,
-    BDropdownItem,
     BPagination,
 
     vSelect,
   },
-  setup() {
-    const USER_APP_STORE_MODULE_NAME = 'artist'
+  setup(props, { root }) {
+    const USER_APP_STORE_MODULE_NAME = "artist";
 
     // Register module
-    if (!store.hasModule(USER_APP_STORE_MODULE_NAME)) store.registerModule(USER_APP_STORE_MODULE_NAME, artistStoreModule)
+    if (!store.hasModule(USER_APP_STORE_MODULE_NAME))
+      store.registerModule(USER_APP_STORE_MODULE_NAME, artistStoreModule);
 
     // UnRegister on leave
     onUnmounted(() => {
-      if (store.hasModule(USER_APP_STORE_MODULE_NAME)) store.unregisterModule(USER_APP_STORE_MODULE_NAME)
-    })
+      if (store.hasModule(USER_APP_STORE_MODULE_NAME))
+        store.unregisterModule(USER_APP_STORE_MODULE_NAME);
+    });
 
-    const isAddNewArtistSidebarActive = ref(false)
+    const deleteArtist = (id) => {
+      store.dispatch("artist/deleteArtist", id).then(() => {
+        root.$router.go();
+      });
+    };
+
+    const isAddNewArtistSidebarActive = ref(false);
 
     const {
       fetchArtist,
@@ -224,13 +260,11 @@ export default {
       searchQuery,
       sortBy,
       isSortDirDesc,
-      refUserListTable,
+      refArtistListTable,
       refetchData,
-
-    } = useArtistList()
+    } = useArtistList();
 
     return {
-
       // Sidebar
       isAddNewArtistSidebarActive,
 
@@ -244,15 +278,16 @@ export default {
       searchQuery,
       sortBy,
       isSortDirDesc,
-      refUserListTable,
+      refArtistListTable,
       refetchData,
+
+      deleteArtist,
 
       // Filter
       avatarText,
-
-    }
+    };
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -262,5 +297,5 @@ export default {
 </style>
 
 <style lang="scss">
-@import '@core/scss/vue/libs/vue-select.scss';
+@import "@core/scss/vue/libs/vue-select.scss";
 </style>

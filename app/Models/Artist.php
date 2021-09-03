@@ -11,7 +11,12 @@ class Artist extends Model
 
     protected $fillable = [
 
-        'name', 'photo', 'description',  'social_media', 'birth_date', 'birth_place'
+        'name', 'photo', 'description',  'facebook', 'instagram', 'twitter', 'youtube', 'birth_date', 'birth_place'
 
     ];
+
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class, 'artist', 'id');
+    }
 }

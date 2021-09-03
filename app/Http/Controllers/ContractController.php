@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Artist;
+use App\Models\Contract;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class ArtistController extends Controller
+class ContractController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,12 +15,12 @@ class ArtistController extends Controller
      */
     public function index()
     {
-        $artist = Artist::all();
+        $contract = Contract::with('artist')->get();
 
         return response([
             'result' => [
                 'status'  => 'success',
-                'artist' => $artist,
+                'contract' => $contract,
             ],
         ], 200);
     }
@@ -32,13 +32,13 @@ class ArtistController extends Controller
      */
     public function view($id)
     {
-        $artist = Artist::where('id', $id)->with('contracts')->first();
+        $contract = Contract::where('id', $id)->with('artist')->first();
 
-        if ($artist) {
+        if ($contract) {
             return response([
                 'result' => [
                     'status'  => 'success',
-                    'artist' => $artist,
+                    'contract' => $contract,
                 ],
             ], 200);
         } else {
@@ -69,29 +69,31 @@ class ArtistController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'description' => 'required',
+            'artist' => 'required',
+            'start_date' => 'required|date',
         ]);
 
         $input = $request->all();
 
-        if ($request->hasfile('photo')) {
-            $image = $request->file('photo');
-            $profileImage = time() . $image->getClientOriginalName();
-            $filePath = 'photo/' . $profileImage;
-            Storage::disk('s3')->put($filePath, file_get_contents($image));
+        if ($request->hasfile('contract')) {
+            $contract = $request->file('contract');
+
+            $contractName = time() . $contract->getClientOriginalName();
+            $filePath = 'contract/' . $request->artist . '/' . $contractName;
+            Storage::disk('s3')->put($filePath, file_get_contents($contract));
 
             $path = Storage::disk('s3')->url($filePath);
-            $input['photo'] = $path;
+            $input['contract'] = $path;
+        } else {
+            $input['contract'] = null;
         }
 
-        $artist = Artist::create($input);
+        $contract = Contract::create($input);
 
         return response([
             'result' => [
                 'status'  => 'success',
-                'artist' => $artist,
+                'contract' => $contract,
             ],
         ], 200);
     }
@@ -99,10 +101,10 @@ class ArtistController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Artist  $artist
+     * @param  \App\Models\Contract  $contract
      * @return \Illuminate\Http\Response
      */
-    public function show(Artist $artist)
+    public function show(Contract $contract)
     {
         //
     }
@@ -110,10 +112,10 @@ class ArtistController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Artist  $artist
+     * @param  \App\Models\Contract  $contract
      * @return \Illuminate\Http\Response
      */
-    public function edit(Artist $artist)
+    public function edit(Contract $contract)
     {
         //
     }
@@ -122,77 +124,56 @@ class ArtistController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Artist  $artist
+     * @param  \App\Models\Contract  $contract
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required',
-            'description' => 'required',
+            'start_date' => 'required|date',
         ]);
 
-        $artist = Artist::find($id);
+        $contract = Contract::find($id);
 
-        if (!$artist) {
+        if (!$contract) {
             return response([
                 'result' => [
                     'status'  => 'error',
-                    'message' => 'Artista no encontrado',
+                    'message' => 'Contrato no encontrado',
                 ],
             ], 400);
         }
 
-        if ($request->hasfile('photo')) {
-            $image = $request->file('photo');
-            $profileImage = time() . $image->getClientOriginalName();
-            $filePath = 'photo/'  . $profileImage;
-            Storage::disk('s3')->put($filePath, file_get_contents($image));
+        if ($request->hasfile('contract')) {
+            $contractFile = $request->file('contract');
+
+            $contractName = time() . $contractFile->getClientOriginalName();
+            $filePath = 'contract/' . $request->artist . '/' . $contractName;
+            Storage::disk('s3')->put($filePath, file_get_contents($contractFile));
 
             $path = Storage::disk('s3')->url($filePath);
-            $artist->photo = $path;
+            $contract->contract = $path;
         }
 
-        $artist->name = $request->name;
-        $artist->description = $request->description;
-        if ($request->birth_date) {
-            $artist->birth_date = $request->birth_date;
+        $contract->start_date = $request->start_date;
+        if ($request->end_date) {
+            $contract->end_date = $request->end_date;
         }
-        if ($request->birth_place) {
-            $artist->birth_place = $request->birth_place;
+        if ($request->value) {
+            $contract->value = $request->value;
         }
-        if ($request->facebook) {
-            $artist->facebook = $request->facebook;
-        }
-        if ($request->instagram) {
-            $artist->instagram = $request->instagram;
-        }
-        if ($request->twitter) {
-            $artist->twitter = $request->twitter;
-        }
-        if ($request->youtube) {
-            $artist->youtube = $request->youtube;
+        if ($request->notes) {
+            $contract->notes = $request->notes;
         }
 
-        $artist->save();
+        $contract->save();
 
         return response([
             'result' => [
                 'status'  => 'success',
-                'artist' => $artist,
+                'contract' => $contract,
             ],
         ], 200);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Artist  $artist
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Artist $artist)
-    {
-        //
     }
 
     /**
@@ -203,23 +184,23 @@ class ArtistController extends Controller
      */
     public function delete($id)
     {
-        $artist = Artist::find($id);
+        $contract = Contract::find($id);
 
-        if (!$artist) {
+        if (!$contract) {
             return response([
                 'result' => [
                     'status'  => 'error',
-                    'message' => 'Artista no encontrado',
+                    'message' => 'Contrato no encontrado',
                 ],
             ], 400);
         }
 
-        $artist->delete();
+        $contract->delete();
 
         return response([
             'result' => [
                 'status'  => 'success',
-                'message' => 'Artist deleted successfully.',
+                'message' => 'Contract deleted successfully.',
             ],
         ], 200);
     }

@@ -13,10 +13,17 @@
   >
     <template #default="{ hide }">
       <!-- Header -->
-      <div class="d-flex justify-content-between align-items-center content-sidebar-header px-2 py-1">
-        <h5 class="mb-0">
-          Añadir nuevo artista
-        </h5>
+      <div
+        class="
+          d-flex
+          justify-content-between
+          align-items-center
+          content-sidebar-header
+          px-2
+          py-1
+        "
+      >
+        <h5 class="mb-0">Añadir nuevo artista</h5>
 
         <feather-icon
           class="ml-1 cursor-pointer"
@@ -24,31 +31,23 @@
           size="16"
           @click="hide"
         />
-
       </div>
 
       <!-- BODY -->
-      <validation-observer
-        #default="{ handleSubmit }"
-        ref="refFormObserver"
-      >
+      <validation-observer #default="{ handleSubmit }" ref="refFormObserver">
         <!-- Form -->
         <b-form
           class="p-2"
           @submit.prevent="handleSubmit(onSubmit)"
           @reset.prevent="resetForm"
         >
-
           <!-- nombre -->
           <validation-provider
             #default="validationContext"
             name="Nombre completo"
             rules="required"
           >
-            <b-form-group
-              label="Nombre completo"
-              label-for="nombre-completo"
-            >
+            <b-form-group label="Nombre completo" label-for="nombre-completo">
               <b-form-input
                 id="nombre-completo"
                 v-model="artistData.name"
@@ -68,12 +67,9 @@
           <validation-provider
             #default="validationContext"
             name="Descripcion"
-            rules="required|alpha-num"
+            rules="required"
           >
-            <b-form-group
-              label="Descripcion"
-              label-for="descripcion"
-            >
+            <b-form-group label="Descripcion" label-for="descripcion">
               <b-form-textarea
                 id="descripcion"
                 v-model="artistData.description"
@@ -88,13 +84,8 @@
           </validation-provider>
 
           <!-- foto -->
-          <validation-provider
-            name="Foto"
-          >
-            <b-form-group
-              label="Foto"
-              label-for="foto"
-            >
+          <validation-provider name="Foto">
+            <b-form-group label="Foto" label-for="foto">
               <b-form-file
                 id="foto"
                 placeholder="Seleccione una foto o arrastrela..."
@@ -106,28 +97,65 @@
             </b-form-group>
           </validation-provider>
 
-          <!-- Redes sociales -->
-          <validation-provider
-            #default="validationContext"
-            name="Redes sociales"
-          >
-            <b-form-group
-              label="Redes sociales"
-              label-for="redes-sociales"
-            >
-              <b-form-textarea
-                id="redes-sociales"
-                v-model="artistData.social_media"
-                :state="getValidationState(validationContext)"
-                trim
-                rows="3"
+          <!-- Facebook -->
+          <b-form-group label="Facebook" label-for="facebook">
+            <b-input-group class="input-group-merge">
+              <b-input-group-prepend is-text>
+                <feather-icon size="16" icon="FacebookIcon" />
+              </b-input-group-prepend>
+              <b-form-input
+                id="facebook"
+                placeholder="https://facebook.com/shakira/"
+                v-model="artistData.facebook"
+                type="url"
               />
+            </b-input-group>
+          </b-form-group>
 
-              <b-form-invalid-feedback>
-                {{ validationContext.errors[0] }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </validation-provider>
+          <!-- Instagram -->
+          <b-form-group label="Instagram" label-for="instagram">
+            <b-input-group class="input-group-merge">
+              <b-input-group-prepend is-text>
+                <feather-icon size="16" icon="InstagramIcon" />
+              </b-input-group-prepend>
+              <b-form-input
+                id="instagram"
+                placeholder="https://instagram.com/shakira/"
+                v-model="artistData.instagram"
+                type="url"
+              />
+            </b-input-group>
+          </b-form-group>
+
+          <!-- Twitter -->
+          <b-form-group label="Twitter" label-for="twitter">
+            <b-input-group class="input-group-merge">
+              <b-input-group-prepend is-text>
+                <feather-icon size="16" icon="TwitterIcon" />
+              </b-input-group-prepend>
+              <b-form-input
+                id="twitter"
+                placeholder="https://twitter.com/shakira/"
+                v-model="artistData.twitter"
+                type="url"
+              />
+            </b-input-group>
+          </b-form-group>
+
+          <!-- Youtube -->
+          <b-form-group label="Youtube" label-for="youtube">
+            <b-input-group class="input-group-merge">
+              <b-input-group-prepend is-text>
+                <feather-icon size="16" icon="YoutubeIcon" />
+              </b-input-group-prepend>
+              <b-form-input
+                id="youtube"
+                placeholder="https://youtube.com/shakira/"
+                v-model="artistData.youtube"
+                type="url"
+              />
+            </b-input-group>
+          </b-form-group>
 
           <!-- Fecha de nacimiento -->
           <validation-provider
@@ -193,7 +221,6 @@
               Cancelar
             </b-button>
           </div>
-
         </b-form>
       </validation-observer>
     </template>
@@ -202,15 +229,25 @@
 
 <script>
 import {
-  BSidebar, BForm, BFormGroup, BFormInput, BFormInvalidFeedback, BButton, BFormTextarea, BFormFile, BFormDatepicker
-} from 'bootstrap-vue'
-import { ValidationProvider, ValidationObserver } from 'vee-validate'
-import { ref } from '@vue/composition-api'
-import { required } from '@validations'
-import formValidation from '@core/comp-functions/forms/form-validation'
-import Ripple from 'vue-ripple-directive'
-import vSelect from 'vue-select'
-import store from '@/store'
+  BSidebar,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BFormInvalidFeedback,
+  BButton,
+  BFormTextarea,
+  BFormFile,
+  BFormDatepicker,
+  BInputGroup,
+  BInputGroupPrepend,
+} from "bootstrap-vue";
+import { ValidationProvider, ValidationObserver } from "vee-validate";
+import { ref } from "@vue/composition-api";
+import { required } from "@validations";
+import formValidation from "@core/comp-functions/forms/form-validation";
+import Ripple from "vue-ripple-directive";
+import vSelect from "vue-select";
+import store from "@/store";
 
 export default {
   components: {
@@ -224,6 +261,8 @@ export default {
     BFormInvalidFeedback,
     BButton,
     vSelect,
+    BInputGroup,
+    BInputGroupPrepend,
 
     // Form Validation
     ValidationProvider,
@@ -233,8 +272,8 @@ export default {
     Ripple,
   },
   model: {
-    prop: 'isAddNewArtistSidebarActive',
-    event: 'update:is-add-new-artist-sidebar-active',
+    prop: "isAddNewArtistSidebarActive",
+    event: "update:is-add-new-artist-sidebar-active",
   },
   props: {
     isAddNewArtistSidebarActive: {
@@ -245,36 +284,35 @@ export default {
   data() {
     return {
       required,
-    }
+    };
   },
   setup(props, { emit }) {
     const blankArtistData = {
-      name: '',
+      name: "",
       photo: null,
-      description: '',
-      social_media: '',
-      birth_date: '',
-      birth_place: '',
-    }
+      description: "",
+      facebook: "",
+      instagram: "",
+      twitter: "",
+      youtube: "",
+      birth_date: "",
+      birth_place: "",
+    };
 
-    const artistData = ref(JSON.parse(JSON.stringify(blankArtistData)))
+    const artistData = ref(JSON.parse(JSON.stringify(blankArtistData)));
     const resetartistData = () => {
-      artistData.value = JSON.parse(JSON.stringify(blankArtistData))
-    }
+      artistData.value = JSON.parse(JSON.stringify(blankArtistData));
+    };
 
     const onSubmit = () => {
-      store.dispatch('artist/addArtist', artistData.value)
-        .then(() => {
-          emit('refetch-data')
-          emit('update:is-add-new-artist-sidebar-active', false)
-        })
-    }
+      store.dispatch("artist/addArtist", artistData.value).then(() => {
+        emit("refetch-data");
+        emit("update:is-add-new-artist-sidebar-active", false);
+      });
+    };
 
-    const {
-      refFormObserver,
-      getValidationState,
-      resetForm,
-    } = formValidation(resetartistData)
+    const { refFormObserver, getValidationState, resetForm } =
+      formValidation(resetartistData);
 
     return {
       artistData,
@@ -283,13 +321,13 @@ export default {
       refFormObserver,
       getValidationState,
       resetForm,
-    }
+    };
   },
-}
+};
 </script>
 
 <style lang="scss">
-@import '@core/scss/vue/libs/vue-select.scss';
+@import "@core/scss/vue/libs/vue-select.scss";
 
 #add-new-artist-sidebar {
   .vs__dropdown-menu {
